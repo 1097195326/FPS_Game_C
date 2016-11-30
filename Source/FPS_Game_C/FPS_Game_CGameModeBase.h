@@ -12,8 +12,9 @@ UCLASS()
 class FPS_GAME_C_API AFPS_Game_CGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
-	
-	
+
+
+		virtual void StartPlay() override;
+
 	
 };

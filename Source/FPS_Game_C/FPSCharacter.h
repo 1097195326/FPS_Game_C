@@ -27,5 +27,8 @@ public:
 		void MoveForward(float value);
 	UFUNCTION()
 		void MoveRight(float value);
-	
+	UFUNCTION()
+		void StartJump();
+	UFUNCTION()
+		void EndJump();
 };

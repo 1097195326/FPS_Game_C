@@ -63,6 +63,6 @@ void AFPSCharacter::StartJump()
 }
 void AFPSCharacter::EndJump()
 {
-	StopJumping();
+	StopJumping();  
 	//bPressedJump = false;
 }

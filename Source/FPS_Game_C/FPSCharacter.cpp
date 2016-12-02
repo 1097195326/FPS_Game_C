@@ -3,6 +3,8 @@
 #include "FPS_Game_C.h"
 #include "FPSCharacter.h"
 
+#include "FPS_Projectile.h"
+
 
 // Sets default values
 AFPSCharacter::AFPSCharacter()
@@ -43,7 +45,7 @@ void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AFPSCharacter::StartJump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &AFPSCharacter::EndJump);
-	
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFPSCharacter::Fire);
 }
 
 void AFPSCharacter::MoveForward(float value)
@@ -65,4 +67,36 @@ void AFPSCharacter::EndJump()
 {
 	StopJumping();  
 	//bPressedJump = false;
+}
+void AFPSCharacter::Fire()
+{
+	if (ProjectileClass)
+	{
+		FVector CameraLocation;
+		FRotator CameraRotation;
+		GetActorEyesViewPoint(CameraLocation, CameraRotation);
+
+		FVector MuzzleLocation = CameraLocation + FTransform(CameraLocation).TransformVector(MuzzleOffset);
+		FRotator MuzzleRotation = CameraRotation;
+
+		MuzzleRotation.Pitch += 10.0f;
+		UWorld * world = GetWorld();
+
+		if (world)
+		{
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = this;
+			SpawnParams.Instigator = Instigator;
+
+			AFPS_Projectile * Projectile = world->SpawnActor<AFPS_Projectile>(ProjectileClass, MuzzleLocation, MuzzleRotation, SpawnParams);
+			if (Projectile)
+			{
+				FVector LaunchDirection = MuzzleRotation.Vector();
+				Projectile->FireInDirection(LaunchDirection);
+			}
+
+		}
+
+	}
+
 }

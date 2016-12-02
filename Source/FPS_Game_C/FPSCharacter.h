@@ -14,6 +14,12 @@ public:
 	// Sets default values for this character's properties
 	AFPSCharacter();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+		FVector MuzzleOffset;
+	UPROPERTY(EditDefaultsOnly, Category = Projectile)
+		TSubclassOf<class AFPS_Projectile> ProjectileClass;
+
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	
@@ -31,4 +37,6 @@ public:
 		void StartJump();
 	UFUNCTION()
 		void EndJump();
+	UFUNCTION()
+		void Fire();
 };

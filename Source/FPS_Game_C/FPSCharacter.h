@@ -19,6 +19,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 		TSubclassOf<class AFPS_Projectile> ProjectileClass;
 
+	UPROPERTY(VisibleAnywhere)
+		UCameraComponent * FPSCameraComponent;
+	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
+		USkeletalMeshComponent * FPSMesh;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

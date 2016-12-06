@@ -76,7 +76,7 @@ void AFPSCharacter::Fire()
 		FRotator CameraRotation;
 		GetActorEyesViewPoint(CameraLocation, CameraRotation);
 
-		FVector MuzzleLocation = CameraLocation + FTransform(CameraLocation).TransformVector(MuzzleOffset);
+		FVector MuzzleLocation = CameraLocation + FTransform(CameraRotation).TransformVector(MuzzleOffset);
 		FRotator MuzzleRotation = CameraRotation;
 
 		MuzzleRotation.Pitch += 10.0f;

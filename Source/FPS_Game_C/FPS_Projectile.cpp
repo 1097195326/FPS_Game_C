@@ -26,6 +26,7 @@ AFPS_Projectile::AFPS_Projectile()
 	ProjectileMovementComponent->Bounciness = 0.3f;
 	//ProjectileMovementComponent->ProjectileGravityScale
 
+	InitialLifeSpan = 3.0f;
 
 }
 
@@ -52,5 +53,6 @@ void AFPS_Projectile::OnHit(UPrimitiveComponent * HitComponent, AActor * OtherAc
 	if (OtherActor != this && OtherComponent->IsSimulatingPhysics())
 	{
 		OtherComponent->AddImpulseAtLocation(ProjectileMovementComponent->Velocity * 100.0f, Hit.ImpactPoint);
+		Destroy();
 	}
 }

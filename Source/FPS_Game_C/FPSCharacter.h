@@ -24,6 +24,16 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 		USkeletalMeshComponent * FPSMesh;
 
+	UPROPERTY(EditDefaultsOnly, Category = WeaponMesh)
+		USkeletalMeshComponent * WeaponMesh;
+
+	UPROPERTY(EditDefaultsOnly, Category = Anim)
+		UAnimMontage * FP_FireMontage;
+	UPROPERTY(EditDefaultsOnly, Category = Anim)
+		UAnimMontage * TP_FireMontage;
+	UPROPERTY(EditDefaultsOnly, Category = Text)
+		FName AttachPoint;
+	//------------------------FUNCTION ----------------------
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	
@@ -43,4 +53,18 @@ public:
 		void EndJump();
 	UFUNCTION()
 		void Fire();
+
+	bool IsFirstPerson();
+	
+	USkeletalMeshComponent * GetUseMesh();
+
+	float PlayAnimMontage(UAnimMontage * anim, float PlayRate);
+	void StopAnimMontage(UAnimMontage * anim);
+
+	FName GetAttachPoint() { return AttachPoint; }
+
+	void EquipWeapon();
+	void DetachWeapon();
+
+	USkeletalMeshComponent * GetSpecificPawnMesh(bool WantFirstPerson);
 };

@@ -4,7 +4,8 @@
 #include "FPSCharacter.h"
 
 #include "FPS_Projectile.h"
-
+#include "Animation/AnimMontage.h"
+#include "Animation/AnimInstance.h"
 
 // Sets default values
 AFPSCharacter::AFPSCharacter()
@@ -23,6 +24,11 @@ AFPSCharacter::AFPSCharacter()
 	FPSMesh->bCastDynamicShadow = false;
 	FPSMesh->CastShadow = false;
 
+	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
+	WeaponMesh->AttachTo(RootComponent);
+	WeaponMesh->bCastDynamicShadow = false;
+	WeaponMesh->CastShadow = false;
+
 	GetMesh()->SetOwnerNoSee(true);
 
 	if (GEngine)
@@ -36,6 +42,7 @@ void AFPSCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	EquipWeapon();
 }
 
 // Called every frame
@@ -106,10 +113,57 @@ void AFPSCharacter::Fire()
 			{
 				FVector LaunchDirection = MuzzleRotation.Vector();
 				Projectile->FireInDirection(LaunchDirection);
+
+				//---play montage
+				PlayAnimMontage(FP_FireMontage, 1.0f);
+
 			}
 
 		}
 
 	}
 
+}
+bool AFPSCharacter::IsFirstPerson()
+{
+	return Controller && Controller->IsLocalPlayerController();
+}
+USkeletalMeshComponent * AFPSCharacter::GetUseMesh()
+{
+	return IsFirstPerson() ? FPSMesh : GetMesh();
+}
+float AFPSCharacter::PlayAnimMontage(UAnimMontage * Anim, float PlayRate)
+{
+	USkeletalMeshComponent * UseMesh = GetUseMesh();
+	if (Anim && UseMesh && UseMesh->AnimScriptInstance)
+	{
+		return UseMesh->AnimScriptInstance->Montage_Play(Anim, PlayRate);
+	}
+	return 0.0f;
+}
+void AFPSCharacter::StopAnimMontage(UAnimMontage * Anim)
+{
+	USkeletalMeshComponent * UseMesh = GetUseMesh();
+	if (Anim && UseMesh && UseMesh->AnimScriptInstance && UseMesh->AnimScriptInstance->Montage_IsPlaying(Anim))
+	{
+		UseMesh->AnimScriptInstance->Montage_Stop(Anim->BlendOut.GetBlendTime(), Anim);
+	}
+}
+void AFPSCharacter::EquipWeapon()
+{
+	USkeletalMeshComponent * PawnFP = GetSpecificPawnMesh(true);
+	USkeletalMeshComponent * PawnTP = GetSpecificPawnMesh(false);
+
+	WeaponMesh->AttachToComponent(PawnFP, FAttachmentTransformRules::KeepRelativeTransform, AttachPoint);
+	//WeaponMesh->AttachToComponent(PawnTP, FAttachmentTransformRules::KeepRelativeTransform, AttachPoint);
+	UE_LOG(LogTemp, Log, TEXT("character equip weapon"));
+
+}
+void AFPSCharacter::DetachWeapon()
+{
+
+}
+USkeletalMeshComponent * AFPSCharacter::GetSpecificPawnMesh(bool WantFirstPerson)
+{
+	return WantFirstPerson ? FPSMesh : GetMesh();
 }

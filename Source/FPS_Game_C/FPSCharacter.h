@@ -25,7 +25,9 @@ public:
 		USkeletalMeshComponent * FPSMesh;
 
 	UPROPERTY(EditDefaultsOnly, Category = WeaponMesh)
-		USkeletalMeshComponent * WeaponMesh;
+		USkeletalMeshComponent * WeaponMeshFP;
+	UPROPERTY(EditDefaultsOnly, Category = WeaponMesh)
+		USkeletalMeshComponent * WeaponMeshTP;
 
 	UPROPERTY(EditDefaultsOnly, Category = Anim)
 		UAnimMontage * FP_FireMontage;

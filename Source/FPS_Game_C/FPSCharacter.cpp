@@ -24,10 +24,19 @@ AFPSCharacter::AFPSCharacter()
 	FPSMesh->bCastDynamicShadow = false;
 	FPSMesh->CastShadow = false;
 
-	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
-	WeaponMesh->AttachTo(RootComponent);
-	WeaponMesh->bCastDynamicShadow = false;
-	WeaponMesh->CastShadow = false;
+	WeaponMeshFP = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMeshFP"));
+	WeaponMeshFP->AttachTo(RootComponent);
+	WeaponMeshFP->bCastDynamicShadow = false;
+	WeaponMeshFP->CastShadow = false;
+	WeaponMeshFP->SetOwnerNoSee(false);
+	WeaponMeshFP->SetOnlyOwnerSee(true);
+
+	WeaponMeshTP = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMeshTP"));
+	WeaponMeshTP->AttachTo(RootComponent);
+	WeaponMeshTP->bCastDynamicShadow = false;
+	WeaponMeshTP->CastShadow = false;
+	WeaponMeshTP->SetOnlyOwnerSee(false);
+	WeaponMeshTP->SetOwnerNoSee(true);
 
 	GetMesh()->SetOwnerNoSee(true);
 
@@ -116,7 +125,7 @@ void AFPSCharacter::Fire()
 
 				//---play montage
 				PlayAnimMontage(FP_FireMontage, 1.0f);
-
+				
 			}
 
 		}
@@ -137,6 +146,7 @@ float AFPSCharacter::PlayAnimMontage(UAnimMontage * Anim, float PlayRate)
 	USkeletalMeshComponent * UseMesh = GetUseMesh();
 	if (Anim && UseMesh && UseMesh->AnimScriptInstance)
 	{
+		UE_LOG(LogTemp, Log, TEXT("Fire And Play Fire Montage"));
 		return UseMesh->AnimScriptInstance->Montage_Play(Anim, PlayRate);
 	}
 	return 0.0f;
@@ -154,8 +164,8 @@ void AFPSCharacter::EquipWeapon()
 	USkeletalMeshComponent * PawnFP = GetSpecificPawnMesh(true);
 	USkeletalMeshComponent * PawnTP = GetSpecificPawnMesh(false);
 
-	WeaponMesh->AttachToComponent(PawnFP, FAttachmentTransformRules::KeepRelativeTransform, AttachPoint);
-	//WeaponMesh->AttachToComponent(PawnTP, FAttachmentTransformRules::KeepRelativeTransform, AttachPoint);
+	WeaponMeshFP->AttachToComponent(PawnFP, FAttachmentTransformRules::KeepRelativeTransform, AttachPoint);
+	WeaponMeshTP->AttachToComponent(PawnTP, FAttachmentTransformRules::KeepRelativeTransform, AttachPoint);
 	UE_LOG(LogTemp, Log, TEXT("character equip weapon"));
 
 }

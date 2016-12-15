@@ -4,6 +4,7 @@
 #include "FPS_Projectile.h"
 
 
+
 // Sets default values
 AFPS_Projectile::AFPS_Projectile()
 {
@@ -14,17 +15,26 @@ AFPS_Projectile::AFPS_Projectile()
 	CollisionComponent->BodyInstance.SetCollisionProfileName(TEXT("Projectile"));
 	CollisionComponent->OnComponentHit.AddDynamic(this, &AFPS_Projectile::OnHit);
 
-	CollisionComponent->InitSphereRadius(15.f);
+	CollisionComponent->InitSphereRadius(5.f);
 	RootComponent = CollisionComponent;
+
+
+	ParticleCom = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("ParticleCom"));
+	ParticleCom->bAutoActivate = false;
+	ParticleCom->bAutoDestroy = false;
+	ParticleCom->SetupAttachment(RootComponent);
+
 
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementCompoent"));
 	ProjectileMovementComponent->SetUpdatedComponent(CollisionComponent);
-	ProjectileMovementComponent->InitialSpeed = 3000.0f;
-	ProjectileMovementComponent->MaxSpeed = 3000.0f;
+	ProjectileMovementComponent->InitialSpeed = 2000.0f;
+	ProjectileMovementComponent->MaxSpeed = 2000.0f;
 	ProjectileMovementComponent->bRotationFollowsVelocity = true;
-	ProjectileMovementComponent->bShouldBounce = true;
-	ProjectileMovementComponent->Bounciness = 0.3f;
-	//ProjectileMovementComponent->ProjectileGravityScale
+	//ProjectileMovementComponent->bShouldBounce = true;
+	//ProjectileMovementComponent->Bounciness = 0.3f;
+	ProjectileMovementComponent->ProjectileGravityScale = 0.0f;
+
+	
 
 	InitialLifeSpan = 3.0f;
 
@@ -52,6 +62,7 @@ void AFPS_Projectile::OnHit(UPrimitiveComponent * HitComponent, AActor * OtherAc
 {
 	if (OtherActor != this && OtherComponent->IsSimulatingPhysics())
 	{
+		UE_LOG(LogTemp, Log, TEXT("Projectile On Hit "));
 		OtherComponent->AddImpulseAtLocation(ProjectileMovementComponent->Velocity * 100.0f, Hit.ImpactPoint);
 		Destroy();
 	}

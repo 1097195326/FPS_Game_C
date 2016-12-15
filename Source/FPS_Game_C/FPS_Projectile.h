@@ -25,6 +25,10 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, Category = Movement)
 		UProjectileMovementComponent * ProjectileMovementComponent;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Particle)
+		UParticleSystemComponent * ParticleCom;
+
 	
 	void FireInDirection(const FVector & ShootDirection);
 

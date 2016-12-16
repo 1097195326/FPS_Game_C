@@ -13,13 +13,13 @@ AFPSCharacter::AFPSCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	FPSCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FPSCameraComponent"));
-	FPSCameraComponent->AttachTo(GetCapsuleComponent());
-	FPSCameraComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 50.0f + BaseEyeHeight));
-	FPSCameraComponent->bUsePawnControlRotation = true;
+	FPSCameraCom = CreateDefaultSubobject<UCameraComponent>(TEXT("FPSCameraCom"));
+	FPSCameraCom->AttachTo(GetCapsuleComponent());
+	FPSCameraCom->SetRelativeLocation(FVector(0.0f, 0.0f,10 + BaseEyeHeight));
+	FPSCameraCom->bUsePawnControlRotation = true;
 
 	FPSMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FirstPersonMesh"));
-	FPSMesh->AttachTo(FPSCameraComponent);
+	FPSMesh->AttachTo(FPSCameraCom);
 	FPSMesh->SetOnlyOwnerSee(true);
 	FPSMesh->bCastDynamicShadow = false;
 	FPSMesh->CastShadow = false;
@@ -74,7 +74,8 @@ void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AFPSCharacter::StartJump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &AFPSCharacter::EndJump);
-	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFPSCharacter::Fire);
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFPSCharacter::StartFire);
+	PlayerInputComponent->BindAction("Fire", IE_Released, this, &AFPSCharacter::StopFire);
 }
 
 void AFPSCharacter::MoveForward(float value)
@@ -97,18 +98,21 @@ void AFPSCharacter::EndJump()
 	StopJumping();  
 	//bPressedJump = false;
 }
-void AFPSCharacter::Fire()
+void AFPSCharacter::StartFire()
 {
 	if (ProjectileClass)
 	{
-		FVector CameraLocation;
-		FRotator CameraRotation;
-		GetActorEyesViewPoint(CameraLocation, CameraRotation);
+		//FVector CameraLocation;
+		//FRotator CameraRotation;
+		//GetActorEyesViewPoint(CameraLocation, CameraRotation);
 
-		FVector MuzzleLocation = CameraLocation + FTransform(CameraRotation).TransformVector(MuzzleOffset);
-		FRotator MuzzleRotation = CameraRotation;
+		USkeletalMeshComponent * UseWeaponMesh = GetUseWeaponMesh();
+		FVector MuzzleLocation = UseWeaponMesh->GetSocketLocation(MuzzleAttachPoint);
+		//FVector MuzzleLocation = CameraLocation + FTransform(CameraRotation).TransformVector(MuzzleOffset);
+		//FRotator MuzzleRotation = CameraRotation;
+		FRotator MuzzleRotation = GetControlRotation();
 
-		MuzzleRotation.Pitch += 10.0f;
+		//MuzzleRotation.Pitch += 10.0f;
 		UWorld * world = GetWorld();
 
 		if (world)
@@ -127,11 +131,22 @@ void AFPSCharacter::Fire()
 				PlayAnimMontage(FP_FireMontage, 1.0f);
 				
 			}
+			if (MuzzleFX)
+			{
+				 MuzzlePSC = UGameplayStatics::SpawnEmitterAttached(MuzzleFX, GetUseWeaponMesh(), MuzzleAttachPoint);
+			}
 
 		}
 
 	}
 
+}
+void AFPSCharacter::StopFire()
+{
+	if (MuzzlePSC != NULL)
+	{
+		MuzzlePSC->DeactivateSystem();
+	}
 }
 bool AFPSCharacter::IsFirstPerson()
 {
@@ -140,6 +155,10 @@ bool AFPSCharacter::IsFirstPerson()
 USkeletalMeshComponent * AFPSCharacter::GetUseMesh()
 {
 	return IsFirstPerson() ? FPSMesh : GetMesh();
+}
+USkeletalMeshComponent * AFPSCharacter::GetUseWeaponMesh()
+{
+	return IsFirstPerson() ? WeaponMeshFP : WeaponMeshTP;
 }
 float AFPSCharacter::PlayAnimMontage(UAnimMontage * Anim, float PlayRate)
 {
@@ -164,8 +183,8 @@ void AFPSCharacter::EquipWeapon()
 	USkeletalMeshComponent * PawnFP = GetSpecificPawnMesh(true);
 	USkeletalMeshComponent * PawnTP = GetSpecificPawnMesh(false);
 
-	WeaponMeshFP->AttachToComponent(PawnFP, FAttachmentTransformRules::KeepRelativeTransform, AttachPoint);
-	WeaponMeshTP->AttachToComponent(PawnTP, FAttachmentTransformRules::KeepRelativeTransform, AttachPoint);
+	WeaponMeshFP->AttachToComponent(PawnFP, FAttachmentTransformRules::KeepRelativeTransform, WeaponAttachPoint);
+	WeaponMeshTP->AttachToComponent(PawnTP, FAttachmentTransformRules::KeepRelativeTransform, WeaponAttachPoint);
 	UE_LOG(LogTemp, Log, TEXT("character equip weapon"));
 
 }

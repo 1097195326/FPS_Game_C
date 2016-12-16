@@ -20,7 +20,7 @@ public:
 		TSubclassOf<class AFPS_Projectile> ProjectileClass;
 
 	UPROPERTY(VisibleAnywhere)
-		UCameraComponent * FPSCameraComponent;
+		UCameraComponent * FPSCameraCom;
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 		USkeletalMeshComponent * FPSMesh;
 
@@ -29,12 +29,19 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = WeaponMesh)
 		USkeletalMeshComponent * WeaponMeshTP;
 
+	UPROPERTY(EditDefaultsOnly, Category = WeaponMesh)
+		UParticleSystem * MuzzleFX;
+	UPROPERTY()
+		UParticleSystemComponent * MuzzlePSC;
+
 	UPROPERTY(EditDefaultsOnly, Category = Anim)
 		UAnimMontage * FP_FireMontage;
 	UPROPERTY(EditDefaultsOnly, Category = Anim)
 		UAnimMontage * TP_FireMontage;
 	UPROPERTY(EditDefaultsOnly, Category = Text)
-		FName AttachPoint;
+		FName WeaponAttachPoint;
+	UPROPERTY(EditDefaultsOnly, Category = Text)
+		FName MuzzleAttachPoint;
 	//------------------------FUNCTION ----------------------
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -54,16 +61,19 @@ public:
 	UFUNCTION()
 		void EndJump();
 	UFUNCTION()
-		void Fire();
+		void StartFire();
+	UFUNCTION()
+		void StopFire();
 
 	bool IsFirstPerson();
 	
 	USkeletalMeshComponent * GetUseMesh();
+	USkeletalMeshComponent * GetUseWeaponMesh();
 
 	float PlayAnimMontage(UAnimMontage * anim, float PlayRate);
 	void StopAnimMontage(UAnimMontage * anim);
 
-	FName GetAttachPoint() { return AttachPoint; }
+	FName GetWeaponAttachPoint() { return WeaponAttachPoint; }
 
 	void EquipWeapon();
 	void DetachWeapon();

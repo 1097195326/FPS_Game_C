@@ -29,7 +29,9 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, Category = Particle)
 		UParticleSystemComponent * ParticleCom;
 
-	
+	UPROPERTY(EditDefaultsOnly, Category = Effects)
+		TSubclassOf<class AProjectileExplosionEffect> ExplosionTemplate;
+
 	void FireInDirection(const FVector & ShootDirection);
 
 	UFUNCTION()

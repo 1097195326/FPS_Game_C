@@ -2,7 +2,7 @@
 
 #include "FPS_Game_C.h"
 #include "FPS_Projectile.h"
-
+#include "ProjectileExplosionEffect.h"
 
 
 // Sets default values
@@ -36,7 +36,7 @@ AFPS_Projectile::AFPS_Projectile()
 
 	
 
-	InitialLifeSpan = 3.0f;
+	InitialLifeSpan = 10.0f;
 
 }
 
@@ -60,10 +60,27 @@ void AFPS_Projectile::FireInDirection(const FVector & ShootDirection)
 }
 void AFPS_Projectile::OnHit(UPrimitiveComponent * HitComponent, AActor * OtherActor, UPrimitiveComponent * OtherComponent, FVector NormalImpulse, const FHitResult & Hit)
 {
-	if (OtherActor != this && OtherComponent->IsSimulatingPhysics())
+	UE_LOG(LogTemp, Log, TEXT("Projectile On Hit "));
+	if (OtherActor != this)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Projectile On Hit "));
-		OtherComponent->AddImpulseAtLocation(ProjectileMovementComponent->Velocity * 100.0f, Hit.ImpactPoint);
-		Destroy();
+		const FVector NudgedImpactLocation = Hit.ImpactPoint + Hit.ImpactNormal * 10.0f;
+		
+		if (ExplosionTemplate)
+		{
+			FTransform const SpawnTransform(Hit.ImpactNormal.Rotation(), NudgedImpactLocation);
+			AProjectileExplosionEffect * const EffectActor = GetWorld()->SpawnActorDeferred<AProjectileExplosionEffect>(ExplosionTemplate, SpawnTransform);
+			if (EffectActor)
+			{
+				EffectActor->SurfaceHit = Hit;
+				UGameplayStatics::FinishSpawningActor(EffectActor, SpawnTransform);
+			}
+		}
+		
+		ParticleCom->Deactivate();
+		ProjectileMovementComponent->StopMovementImmediately();
+		SetLifeSpan(2.0f);
+
+		//OtherComponent->AddImpulseAtLocation(ProjectileMovementComponent->Velocity * 100.0f, Hit.ImpactPoint);
+		
 	}
 }

@@ -66,6 +66,9 @@ public:
 		void StopFire();
 
 	bool IsFirstPerson();
+
+	UFUNCTION(BlueprintCallable, Category = "Game")
+	FRotator GetAnimOffsets() const;
 	
 	USkeletalMeshComponent * GetUseMesh();
 	USkeletalMeshComponent * GetUseWeaponMesh();

@@ -196,3 +196,11 @@ USkeletalMeshComponent * AFPSCharacter::GetSpecificPawnMesh(bool WantFirstPerson
 {
 	return WantFirstPerson ? FPSMesh : GetMesh();
 }
+FRotator AFPSCharacter::GetAnimOffsets() const
+{
+	const FVector AnimDirWS = GetBaseAimRotation().Vector();
+	const FVector AnimDirLS = ActorToWorld().InverseTransformVectorNoScale(AnimDirWS);
+	const FRotator AnimRotLS = AnimDirLS.Rotation();
+
+	return AnimRotLS;
+}

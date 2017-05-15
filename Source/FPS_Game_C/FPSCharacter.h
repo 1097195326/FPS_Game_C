@@ -33,11 +33,15 @@ public:
 		UParticleSystem * MuzzleFX;
 	UPROPERTY()
 		UParticleSystemComponent * MuzzlePSC;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Health)
+		float Health;
 
 	UPROPERTY(EditDefaultsOnly, Category = Anim)
 		UAnimMontage * FP_FireMontage;
 	UPROPERTY(EditDefaultsOnly, Category = Anim)
 		UAnimMontage * TP_FireMontage;
+	UPROPERTY(EditDefaultsOnly, Category = Anim)
+		UAnimMontage * DeathAnim;
 	UPROPERTY(EditDefaultsOnly, Category = Text)
 		FName WeaponAttachPoint;
 	UPROPERTY(EditDefaultsOnly, Category = Text)
@@ -52,6 +56,8 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser) override;
+
 	UFUNCTION()
 		void MoveForward(float value);
 	UFUNCTION()
@@ -65,7 +71,14 @@ public:
 	UFUNCTION()
 		void StopFire();
 
+	void OnDealth();
+	void StopAllAnimMontages();
 	bool IsFirstPerson();
+	
+	void SetRagdollPhysics();
+
+	UFUNCTION(BlueprintCallable,Category = "Game")
+		bool IsDied();
 
 	UFUNCTION(BlueprintCallable, Category = "Game")
 	FRotator GetAnimOffsets() const;

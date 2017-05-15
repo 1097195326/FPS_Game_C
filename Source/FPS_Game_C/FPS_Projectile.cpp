@@ -36,7 +36,8 @@ AFPS_Projectile::AFPS_Projectile()
 
 	
 
-	InitialLifeSpan = 10.0f;
+	InitialLifeSpan = DamageConfig.ProjectileLife;
+
 
 }
 
@@ -60,7 +61,7 @@ void AFPS_Projectile::FireInDirection(const FVector & ShootDirection)
 }
 void AFPS_Projectile::OnHit(UPrimitiveComponent * HitComponent, AActor * OtherActor, UPrimitiveComponent * OtherComponent, FVector NormalImpulse, const FHitResult & Hit)
 {
-	UE_LOG(LogTemp, Log, TEXT("Projectile On Hit "));
+	//UE_LOG(LogTemp, Log, TEXT("Projectile On Hit "));
 	if (OtherActor != this)
 	{
 		const FVector NudgedImpactLocation = Hit.ImpactPoint + Hit.ImpactNormal * 10.0f;
@@ -80,7 +81,10 @@ void AFPS_Projectile::OnHit(UPrimitiveComponent * HitComponent, AActor * OtherAc
 		ProjectileMovementComponent->StopMovementImmediately();
 		SetLifeSpan(2.0f);
 
-		//OtherComponent->AddImpulseAtLocation(ProjectileMovementComponent->Velocity * 100.0f, Hit.ImpactPoint);
-		
+		if (DamageConfig.ExplosionDamage > 0.0f && DamageConfig.ExplosionRadius > 0.0f && DamageConfig.DamageType)
+		{
+			//UE_LOG(LogTemp, Log, TEXT("apply damage"));
+			UGameplayStatics::ApplyRadialDamage(this, DamageConfig.ExplosionDamage, NudgedImpactLocation, DamageConfig.ExplosionRadius, DamageConfig.DamageType, TArray<AActor*>(),this);
+		}
 	}
 }

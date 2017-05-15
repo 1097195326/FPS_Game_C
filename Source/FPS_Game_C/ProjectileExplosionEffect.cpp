@@ -66,11 +66,11 @@ void AProjectileExplosionEffect::Tick( float DeltaTime )
 
 		UPointLightComponent * DefLight = Cast<UPointLightComponent>(GetClass()->GetDefaultSubobjectByName(ExplosionLightComponentName));
 		
-		UE_LOG(LogTemp, Log, TEXT("DefLight->Intensity:%f"),DefLight->Intensity);
+		//UE_LOG(LogTemp, Log, TEXT("DefLight->Intensity:%f"),DefLight->Intensity);
 
 		ExplosionLight->SetIntensity(DefLight->Intensity * FadeAlpha);
 
-		UE_LOG(LogTemp, Log, TEXT("ExplosionLight->Intensity:%f"), ExplosionLight->Intensity);
+		//UE_LOG(LogTemp, Log, TEXT("ExplosionLight->Intensity:%f"), ExplosionLight->Intensity);
 	}
 	else
 	{

@@ -40,6 +40,8 @@ AFPSCharacter::AFPSCharacter()
 
 	GetMesh()->SetOwnerNoSee(true);
 
+	Health = 100.0f;
+
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("We are using FPSCharacter"));
@@ -77,7 +79,113 @@ void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFPSCharacter::StartFire);
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &AFPSCharacter::StopFire);
 }
+float AFPSCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser)
+{
+	/*UE_LOG(LogTemp, Log, TEXT("Character Take Damage : %f"),Health);*/
+	if (Health < 0.0f)
+	{
+		return 0.0f;
+	}
+	const float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+	if (ActualDamage > 0.0f)
+	{
+		Health -= ActualDamage;
+		if (Health <= 0.0f)
+		{
+			OnDealth();
+		}
+	}
+	return ActualDamage;
+}
+void AFPSCharacter::OnDealth()
+{
+	Health = FMath::Min(0.0f, Health);
+	DetachFromControllerPendingDestroy();
+	StopAllAnimMontages();
 
+	if (GetMesh())
+	{
+		static FName CollisionProfileName(TEXT("Ragdoll"));
+		GetMesh()->SetCollisionProfileName(CollisionProfileName);
+	}
+	SetActorEnableCollision(true);
+
+	float DeathAnimDuration = PlayAnimMontage(DeathAnim, 1.0f);
+	UE_LOG(LogTemp, Log, TEXT("PlayAnimMontage : %f"), DeathAnimDuration);
+	if (DeathAnimDuration > 0.f)
+	{
+		// Trigger ragdoll a little before the animation early so the character doesn't
+		// blend back to its normal position.
+		const float TriggerRagdollTime = DeathAnimDuration - 0.7f;
+
+		// Enable blend physics so the bones are properly blending against the montage.
+		GetMesh()->bBlendPhysics = true;
+
+		UE_LOG(LogTemp, Log, TEXT("111111111111111"));
+		// Use a local timer handle as we don't need to store it for later but we don't need to look for something to clear
+		FTimerHandle TimerHandle;
+		GetWorldTimerManager().SetTimer(TimerHandle, this, &AFPSCharacter::SetRagdollPhysics, FMath::Max(0.1f, TriggerRagdollTime), false);
+	}
+	else
+	{
+		SetRagdollPhysics();
+	}
+	UE_LOG(LogTemp, Log, TEXT("333333333333"));
+	// disable collisions on capsule
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Ignore);
+}
+void AFPSCharacter::SetRagdollPhysics()
+{
+	UE_LOG(LogTemp, Log, TEXT("2222222222"));
+	bool bInRagdoll = false;
+
+	if (IsPendingKill())
+	{
+		bInRagdoll = false;
+	}
+	else if (!GetMesh() || !GetMesh()->GetPhysicsAsset())
+	{
+		bInRagdoll = false;
+	}
+	else
+	{
+		// initialize physics/etc
+		GetMesh()->SetSimulatePhysics(true);
+		GetMesh()->WakeAllRigidBodies();
+		GetMesh()->bBlendPhysics = true;
+
+		bInRagdoll = true;
+	}
+
+	GetCharacterMovement()->StopMovementImmediately();
+	GetCharacterMovement()->DisableMovement();
+	GetCharacterMovement()->SetComponentTickEnabled(false);
+
+	if (!bInRagdoll)
+	{
+		// hide and set short lifespan
+		TurnOff();
+		SetActorHiddenInGame(true);
+		SetLifeSpan(1.0f);
+	}
+	else
+	{
+		SetLifeSpan(10.0f);
+	}
+}
+bool AFPSCharacter::IsDied()
+{
+	return Health <= 0.0f;
+}
+void AFPSCharacter::StopAllAnimMontages()
+{
+	USkeletalMeshComponent * UseMesh = GetUseMesh();
+	if (UseMesh && UseMesh->AnimScriptInstance)
+	{
+		UseMesh->AnimScriptInstance->Montage_Stop(0.0f);
+	}
+}
 void AFPSCharacter::MoveForward(float value)
 {
 	FVector Direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::X);
@@ -165,7 +273,7 @@ float AFPSCharacter::PlayAnimMontage(UAnimMontage * Anim, float PlayRate)
 	USkeletalMeshComponent * UseMesh = GetUseMesh();
 	if (Anim && UseMesh && UseMesh->AnimScriptInstance)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Fire And Play Fire Montage"));
+		//UE_LOG(LogTemp, Log, TEXT("Fire And Play Fire Montage"));
 		return UseMesh->AnimScriptInstance->Montage_Play(Anim, PlayRate);
 	}
 	return 0.0f;
